@@ -74,7 +74,7 @@ class Promise{
         }
     }
     // then(onFulfilled,onRjected){
-    //     /** 1. pending状态下将函数放入回掉队列*/
+    //     /** 1. pending状态下将函数放入回调队列*/
     //     if(this.status === 'pending'){
     //         this.onResolvedsCallbacks.push(()=>{
     //             onFulfilled(this.value);
@@ -84,7 +84,7 @@ class Promise{
     //         });
     //     }
 
-    //     /** 2。settled状态下直接调用函数*/
+    //     /** 2. settled状态下直接调用函数*/
     //     if(this.status === 'resolved'){
     //         onFulfilled(this.value);
     //     }
