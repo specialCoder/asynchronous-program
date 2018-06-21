@@ -17,7 +17,6 @@ const util = {
 function OwnerEventEmitter(){
     this.events = {};
     this.onceEvents = {};
-    console.log('once');
 }
 OwnerEventEmitter.prototype.$once = function(eventName,callback){
     const events = this.onceEvents;
