@@ -25,6 +25,8 @@ OwnerEventEmitter.prototype.$once = function(eventName,callback){
             events[eventName] = [];
         }
         events[eventName].push(callback);
+    }else{
+        throw Error('TypeError : callback must is function type');
     }
 }
 OwnerEventEmitter.prototype.$on = function(eventName,callback){
@@ -34,6 +36,8 @@ OwnerEventEmitter.prototype.$on = function(eventName,callback){
             events[eventName] = [];
         }
         events[eventName].push(callback);
+    }else{
+        throw Error('TypeError : callback must is function type');
     }
 }
 OwnerEventEmitter.prototype.$emit = function(eventName,data){
