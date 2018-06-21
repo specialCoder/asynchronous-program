@@ -5,7 +5,7 @@ start to implement asynchronous demo
 - step 1
 > complete PromiseA specification including : Promise and Deferred
 
-- stpe 2
+- step 2
 > complete ES6 Promise
 
 
