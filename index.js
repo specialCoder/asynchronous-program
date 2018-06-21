@@ -12,7 +12,9 @@ const util = {
 /**
  * 发布订阅模式
  * 模拟实现EventEmitter
- * TODO：移除事件监听未设置
+ * TODO：
+ * 1.移除事件监听未设置
+ * 2.没有实现then的链式调用
  */
 function OwnerEventEmitter(){
     this.events = {};
