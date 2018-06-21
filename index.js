@@ -100,7 +100,7 @@ Deferred.prototype.reject = function(error){
     this.state = 'failed';
     this.promise.$emit('error',error);
 }
-Deferred.prototype.reject = function(data){
+Deferred.prototype.progress = function(data){
     this.state = 'progress';
     this.promise.$emit('progress',data);
 }
