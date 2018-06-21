@@ -1,0 +1,154 @@
+referrence Url: 75周刊
+
+class Promise{
+    constructor(executor){
+        this.status = "pending";
+        this.value = undefined;
+        this.reason = undefined;
+        this.onResolvedsCallbacks = [];
+        this.onRejectedCallbacks = [];
+        // this.resolve = (value)=>{
+        //     if(this.status === 'pending'){
+        //         this.status = 'resolved';
+        //         this.value = value;
+        //         this.onResolvedsCallbacks.forEach((fn)=>{
+        //             fn();
+        //         })
+        //     }
+        // }
+        this.resolvePromise = (promise2, x, resolve, reject) =>{
+            // 接受四个参数，新Promise、返回值，成功和失败的回调
+            // 有可能这里返回的x是别人的promise
+            // 尽可能允许其他乱写
+            if (promise2 === x) { //这里应该报一个类型错误，来解决问题4
+                return reject(new TypeError('循环引用了'))
+            }
+            // 看x是不是一个promise,promise应该是一个对象
+            let called; // 表示是否调用过成功或者失败，用来解决问题7
+            //下面判断上一次then返回的是普通值还是函数，来解决问题1、2
+            if (x !== null && (typeof x === 'object' || typeof x === 'function')) {
+                // 可能是promise {},看这个对象中是否有then方法，如果有then我就认为他是promise了
+                try {
+                    let then = x.then;// 保存一下x的then方法
+                    if (typeof then === 'function') {
+                        // 成功
+                        //这里的y也是官方规范，如果还是promise，可以当下一次的x使用
+                        //用call方法修改指针为x，否则this指向window
+                        then.call(x, function (y) {
+                            if (called) return //如果调用过就return掉
+                            called = true
+                            // y可能还是一个promise，在去解析直到返回的是一个普通值
+                            resolvePromise(promise2, y, resolve, reject)//递归调用，解决了问题6
+                        }, function (err) { //失败
+                            if (called) return
+                            called = true
+                            reject(err);
+                        })
+                    } else {
+                        resolve(x)
+                    }
+                } catch (e) {
+                    if (called) return
+                    called = true;
+                    reject(e);
+                }
+            } else { // 说明是一个普通值1
+                resolve(x); // 表示成功了
+            }
+        }
+        
+        this.reject = (reason)=>{
+            if(this.status === 'pending'){
+                this.status = 'rejected';
+                this.reason = reason;
+                this.onRejectedCallbacks.forEach((fn)=>{
+                    fn();
+                })
+            }
+        }
+        try{
+            executor(this.resolve,this.reject);
+
+        }catch(e){
+            this.reject(e);
+        }
+    }
+    // then(onFulfilled,onRjected){
+    //     /** 1. pending状态下将函数放入回掉队列*/
+    //     if(this.status === 'pending'){
+    //         this.onResolvedsCallbacks.push(()=>{
+    //             onFulfilled(this.value);
+    //         });
+    //         this.onRejectedCallbacks.push(()=>{
+    //             onRjected(this.reason);
+    //         });
+    //     }
+
+    //     /** 2。settled状态下直接调用函数*/
+    //     if(this.status === 'resolved'){
+    //         onFulfilled(this.value);
+    //     }
+    //     if(this.status === 'rejected'){
+    //         onRjected(this.reason);
+    //     }
+    //     return this; // 根本行不通
+    // }
+    then(onFulfilled,onRjected){
+        onFulfilled = typeof onFulfilled === 'function' ? onFulfilled : function(value){return value;}
+        onRjected = typeof onRjected === 'function' ? onRjected : function(err){throw err;}
+
+        let promise2;
+        if (this.status === 'resolved') {
+            promise2 = new Promise(function (resolve, reject) {
+                setTimeout(function(){
+                    try {
+                        let x = onFulfilled(this.value)
+                        resolvePromise(promise2, x, resolve, reject);
+                    } catch (e) {
+                        reject(e)
+                    }
+                });
+            })
+        }
+        if (this.status === 'rejected') {
+            promise2 = new Promise(function (resolve, reject) {
+                setTimeout(function () {
+                    try {
+                        let x = onRjected(this.reason)
+                        resolvePromise(promise2, x, resolve, reject);                    
+                    } catch (e) {
+                        reject(e)
+                    }
+                });
+            })
+        }
+        if(this.status === 'pending'){
+            promise2 = new Promise(function (resolve, reject ){
+                this.onResolvedCallbacks.push(()=>{
+                    setTimeout(function () {
+                        try {
+                            let x = onFulfilled(_this.value)
+                            resolvePromise(promise2, x, resolve, reject);                        
+                        } catch (e) {
+                            reject(e)
+                        }
+                    });
+                })
+                this.onRejectedCallbacks.push(()=>{
+                    setTimeout(function () {
+                        try {
+                            let x = onRjected(_this.reason)
+                            resolvePromise(promise2, x, resolve, reject);                        
+                        } catch (e) {
+                            reject(e)
+                        }
+                    });
+                })
+             })
+        }
+        return promise2;
+    }
+}
+module.exports = Promise;
+
+  
